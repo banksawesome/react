@@ -6,31 +6,49 @@ import './assets/css/tiny-slider.css';
 
 const Shop = () => {
     const [products, setProducts] = useState([]);
+    const [filteredProducts, setFilteredProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
     const productsPerPage = 8; // Number of products per page
 
     useEffect(() => {
-        fetchProducts(currentPage);
-    }, [currentPage]);
+        fetchProducts();
+    }, []);
 
-    const fetchProducts = (page) => {
-        const skip = (page - 1) * productsPerPage;
+    useEffect(() => {
+        handleSearch();
+    }, [searchQuery, products]);
 
-        fetch(`https://dummyjson.com/products?limit=${productsPerPage}&skip=${skip}`)
+    const fetchProducts = () => {
+        fetch(`https://dummyjson.com/products?limit=100`) // Fetch a larger number to enable searching
             .then(res => res.json())
             .then(data => {
                 setProducts(data.products);
-                setTotalProducts(data.total);
+                setFilteredProducts(data.products);
+                setTotalProducts(data.products.length);
             })
             .catch(error => console.error('Error fetching products:', error));
     };
 
-    const totalPages = Math.ceil(totalProducts / productsPerPage);
+    const handleSearch = () => {
+        const filtered = products.filter(product =>
+            product.title.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+        setFilteredProducts(filtered);
+        setTotalProducts(filtered.length);
+        setCurrentPage(1); // Reset to first page on new search
+    };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
     };
+
+    const totalPages = Math.ceil(totalProducts / productsPerPage);
+    const currentProducts = filteredProducts.slice(
+        (currentPage - 1) * productsPerPage,
+        currentPage * productsPerPage
+    );
 
     return (
         <>
@@ -50,8 +68,21 @@ const Shop = () => {
 
             <div className="untree_co-section product-section before-footer-section">
                 <div className="container">
+                    {/* Search Bar */}
+                    <div className="row mb-4">
+                        <div className="col-12">
+                            <input
+                                type="text"
+                                className="form-control"
+                                placeholder="Search products..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                            />
+                        </div>
+                    </div>
+
                     <div className="row">
-                        {products.map(product => (
+                        {currentProducts.map(product => (
                             <div key={product.id} className="col-12 col-md-4 col-lg-3 mb-5">
                                 <a className="product-item" href="#">
                                     <img src={product.thumbnail} alt={product.title} className="img-fluid product-thumbnail" />
