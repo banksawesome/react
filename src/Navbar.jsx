@@ -41,7 +41,7 @@ const Navbar = () => {
 
                         <ul className="custom-navbar-cta navbar-nav mb-2 mb-md-0 ms-5">
                             <li><a className="nav-link" href="#"><img src="../src/assets/images/user.svg" alt="user icon" /></a></li>
-                            <li><a className="nav-link" href="cart.html"><img src="../src/assets/images/cart.svg" alt="cart icon" /></a></li>
+                            <li><a className="nav-link" href="/cart"><img src="../src/assets/images/cart.svg" alt="cart icon" /></a></li>
                         </ul>
                     </div>
                 </div>

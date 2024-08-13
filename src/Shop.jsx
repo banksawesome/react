@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import Navbar from './Navbar';
 import './assets/css/bootstrap.min.css';
 import './assets/css/style.css';
@@ -10,7 +11,8 @@ const Shop = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalProducts, setTotalProducts] = useState(0);
     const [searchQuery, setSearchQuery] = useState('');
-    const productsPerPage = 8; // Number of products per page
+    const productsPerPage = 8;
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchProducts();
@@ -21,7 +23,7 @@ const Shop = () => {
     }, [searchQuery, products]);
 
     const fetchProducts = () => {
-        fetch(`https://dummyjson.com/products?limit=100`) // Fetch a larger number to enable searching
+        fetch('https://dummyjson.com/products?limit=100')
             .then(res => res.json())
             .then(data => {
                 setProducts(data.products);
@@ -37,11 +39,33 @@ const Shop = () => {
         );
         setFilteredProducts(filtered);
         setTotalProducts(filtered.length);
-        setCurrentPage(1); // Reset to first page on new search
+        setCurrentPage(1);
     };
 
     const handlePageChange = (page) => {
         setCurrentPage(page);
+    };
+
+    const handleAddToCart = (product) => {
+        fetch('https://dummyjson.com/carts/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                userId: 1,
+                products: [
+                    {
+                        id: product.id,
+                        quantity: 1,
+                    },
+                ],
+            }),
+        })
+            .then(res => res.json())
+            .then(data => {
+                console.log('Cart updated:', data);
+                navigate('/cart');
+            })
+            .catch(error => console.error('Error adding to cart:', error));
     };
 
     const totalPages = Math.ceil(totalProducts / productsPerPage);
@@ -68,7 +92,6 @@ const Shop = () => {
 
             <div className="untree_co-section product-section before-footer-section">
                 <div className="container">
-                    {/* Search Bar */}
                     <div className="row mb-4">
                         <div className="col-12">
                             <input
@@ -84,7 +107,7 @@ const Shop = () => {
                     <div className="row">
                         {currentProducts.map(product => (
                             <div key={product.id} className="col-12 col-md-4 col-lg-3 mb-5">
-                                <a className="product-item" href="#">
+                                <a className="product-item" href="#" onClick={() => handleAddToCart(product)}>
                                     <img src={product.thumbnail} alt={product.title} className="img-fluid product-thumbnail" />
                                     <h3 className="product-title">{product.title}</h3>
                                     <strong className="product-price">${product.price}</strong>
@@ -97,7 +120,6 @@ const Shop = () => {
                         ))}
                     </div>
 
-                    {/* Bootstrap Styled Pagination */}
                     <nav>
                         <ul className="pagination justify-content-center">
                             <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
